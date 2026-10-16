@@ -119,29 +119,29 @@ add_action('admin_footer', function () {
                 </div>
                 <div>
                     <p class="beitrag-update-popup__eyebrow"><?php echo esc_html(sprintf('Release %s', $version)); ?></p>
-                    <h2 id="beitrag-update-popup-title"><?php echo esc_html__('Neue KI-Modelle und mehr Zuverlässigkeit', 'ai-beitragseinreichung'); ?></h2>
+                    <h2 id="beitrag-update-popup-title"><?php echo esc_html__('Zuverlässiger einreichen und gezielter gestalten', 'ai-beitragseinreichung'); ?></h2>
                 </div>
             </div>
 
-            <p><?php echo esc_html__('Version 1.2.6 verbessert die KI-Unterstützung, die Vorschau und die Darstellung deiner Beiträge in WordPress.', 'ai-beitragseinreichung'); ?></p>
+            <p><?php echo esc_html__('Version 1.3.0 ergänzt abgesicherte Speicherung, nachvollziehbaren Mailversand und optionale lokale Symbole.', 'ai-beitragseinreichung'); ?></p>
 
             <div class="beitrag-update-popup__highlights">
                 <div>
-                    <strong><?php echo esc_html__('Neues KI-Standardmodell', 'ai-beitragseinreichung'); ?></strong>
-                    <p><?php echo esc_html__('GPT-5.6 Terra ist das neue Standardmodell für eine ausgewogene und zuverlässige Textüberarbeitung.', 'ai-beitragseinreichung'); ?></p>
+                    <strong><?php echo esc_html__('Sicherer Abschluss', 'ai-beitragseinreichung'); ?></strong>
+                    <p><?php echo esc_html__('Abgelaufene Vorschauen werden erkannt; doppelte Einreichungen werden verhindert. Entwurf und Abschlussmodus sind klar getrennt.', 'ai-beitragseinreichung'); ?></p>
                 </div>
                 <div>
-                    <strong><?php echo esc_html__('Vorschau vor dem Speichern', 'ai-beitragseinreichung'); ?></strong>
-                    <p><?php echo esc_html__('Prüfe Titel, Text, Schlagwörter und Bilder vor dem Einreichen und lasse den Beitrag bei Bedarf gezielt überarbeiten.', 'ai-beitragseinreichung'); ?></p>
+                    <strong><?php echo esc_html__('Mailversand mit Status', 'ai-beitragseinreichung'); ?></strong>
+                    <p><?php echo esc_html__('Prüfe den Versandstatus im Beitragseditor. Eindeutig fehlgeschlagene Versuche werden begrenzt wiederholt.', 'ai-beitragseinreichung'); ?></p>
                 </div>
                 <div>
-                    <strong><?php echo esc_html__('Bessere WordPress-Formatierung', 'ai-beitragseinreichung'); ?></strong>
-                    <p><?php echo esc_html__('Überschriften, Listen, Hervorhebungen und einfache Tabellen werden sauber für WordPress aufbereitet.', 'ai-beitragseinreichung'); ?></p>
+                    <strong><?php echo esc_html__('Optionale Symbole und KI-Grenzen', 'ai-beitragseinreichung'); ?></strong>
+                    <p><?php echo esc_html__('Lokale Symbole je Stilgruppe, getrennte Protokollrechte und einstellbare Grenzen für KI-Anfragen.', 'ai-beitragseinreichung'); ?></p>
                 </div>
             </div>
 
             <div class="beitrag-update-popup__actions">
-                <a class="button button-primary" href="<?php echo esc_url('https://github.com/jan-erbert/ai-beitragseinreichung/wiki'); ?>" target="_blank" rel="noopener noreferrer">
+                <a class="button button-primary" href="<?php echo esc_url('https://github.com/jan-erbert/ai-beitragseinreichung-wordpress/wiki'); ?>" target="_blank" rel="noopener noreferrer">
                     <?php echo esc_html__('Wiki öffnen', 'ai-beitragseinreichung'); ?>
                 </a>
                 <?php if ($can_manage_settings) : ?>

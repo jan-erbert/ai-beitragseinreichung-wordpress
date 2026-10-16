@@ -107,3 +107,29 @@ if ($long_title_length > 43 || substr($long_title, -3) !== '...') {
 }
 
 echo "Markdown-Formatting-Smoke-Test erfolgreich.\n";
+
+/** Aktiviert fuer den Integrationstest ausschliesslich den lokalen Symbolpool. */
+function get_option($key, $default = false)
+{
+    return $key === 'beitragseinreichung_symbols_enabled' ? 1 : $default;
+}
+
+/** Simuliert die Aufteilung in Text und HTML-Tags fuer die Symboleinbettung. */
+function wp_html_split($html)
+{
+    return preg_split('/(<[^>]*>)/', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
+}
+
+/** Liefert eine feste Testadresse ohne externe Anfragen. */
+function plugin_dir_url($path)
+{
+    return 'https://example.test/plugins/wp-ai-form/';
+}
+
+require dirname(__DIR__) . '/includes/formatting/symbols.php';
+$symbol_blocks = beitrag_wandle_zu_gutenberg_blocks("## [[symbol:info]] Ergebnis\n\n| Name | Zeit |\n|---|---|\n| [[symbol:termin]] Start | 10:00 |\n");
+assert_contains('<!-- wp:heading', $symbol_blocks, 'Symbol zerstoert den Gutenberg-Ueberschriftsblock.');
+assert_contains('/assets/lucide/icons/info.svg', $symbol_blocks, 'Symbol fehlt in einer echten Markdown-Ueberschrift.');
+assert_contains('<!-- wp:table', $symbol_blocks, 'Symbol zerstoert den Gutenberg-Tabellenblock.');
+assert_contains('/assets/lucide/icons/calendar-days.svg', $symbol_blocks, 'Symbol fehlt in einer echten Tabellenzelle.');
+echo "Symbol-Integration mit Gutenberg-Ueberschriften und Tabellen erfolgreich.\n";

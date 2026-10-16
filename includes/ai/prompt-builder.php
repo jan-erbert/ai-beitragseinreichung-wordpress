@@ -18,7 +18,8 @@ function beitrag_ki_ermittle_stil_prompt($stilgruppe_label = '')
         }
     }
 
-    return trim($stilbeschreibung . ($grundstil ? "\n\n" . $grundstil : ''));
+    $prompt = trim($stilbeschreibung . ($grundstil ? "\n\n" . $grundstil : ''));
+    return $prompt . (function_exists('beitragseinreichung_symbol_prompt') ? beitragseinreichung_symbol_prompt($stilgruppe_label) : '');
 }
 
 /**

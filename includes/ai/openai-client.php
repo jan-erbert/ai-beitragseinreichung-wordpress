@@ -153,6 +153,18 @@ function beitrag_ki_optimiere_beitrag($titel, $inhalt, $modell, $zusatz, $stilgr
         'max_output_tokens' => 3000,
     ], beitrag_get_ai_model_request_options($modell));
 
+    if (function_exists('beitragseinreichung_reserve_ai_request')) {
+        $guard_error = beitragseinreichung_ai_input_error($inhalt, $zusatz);
+        if ($guard_error === '') {
+            $guard_error = beitragseinreichung_reserve_ai_request();
+        }
+        if ($guard_error !== '') {
+            $beitrag_ki_fehler = true;
+            $beitrag_ki_fehler_meldung = $guard_error;
+            return ['title' => $titel, 'content' => $inhalt, 'excerpt' => '', 'tags' => []];
+        }
+    }
+
     $response = beitrag_openai_responses_request($api_key, $request_body);
 
     if (is_wp_error($response)) {
@@ -186,6 +198,9 @@ function beitrag_ki_optimiere_beitrag($titel, $inhalt, $modell, $zusatz, $stilgr
 
     $content = beitrag_openai_extract_response_text($body);
     $data = beitrag_ki_parse_json_antwort($content);
+    if (is_array($data) && isset($data['content']) && function_exists('beitragseinreichung_filter_ai_symbols')) {
+        $data['content'] = beitragseinreichung_filter_ai_symbols($data['content'], $stilgruppe_label);
+    }
 
     if (!$data || empty($data['title']) || empty($data['content'])) {
         $beitrag_ki_fehler = true;

@@ -28,12 +28,14 @@ function beitragseinreichung_formular_anzeige()
             $link = admin_url('post.php?post=' . $beitrag_id . '&action=edit');
         ?>
             <div class="notice notice-success">
-                <p>Beitrag erfolgreich eingereicht! <a href="<?php echo esc_url($link); ?>" target="_blank">Beitrag anzeigen &rarr;</a></p>
+                <p>Beitrag erfolgreich gespeichert! <a href="<?php echo esc_url($link); ?>" target="_blank">Beitrag anzeigen &rarr;</a></p>
             </div>
         <?php endif; ?>
 
         <form id="beitragseinreichung-formular" method="post" enctype="multipart/form-data" action="">
             <?php wp_nonce_field('beitrag_einreichen', 'beitrag_nonce'); ?>
+            <input type="hidden" name="beitrag_submission_token" value="<?php echo esc_attr(beitragseinreichung_create_submission_token()); ?>">
+            <input type="hidden" id="beitrag_save_action" name="beitrag_save_action" value="complete">
             <h1>Beitrag einreichen</h1>
             <table class="form-table">
                 <tr>
@@ -44,6 +46,15 @@ function beitragseinreichung_formular_anzeige()
                     <th><label for="beitrag_inhalt">Inhalt <span class="required">*</span></label></th>
                     <td><textarea name="beitrag_inhalt" id="beitrag_inhalt" rows="16" class="large-text" required></textarea></td>
                 </tr>
+                <?php if (get_option('beitragseinreichung_symbols_enabled', 0)): ?>
+                    <tr><th>Symbol einfügen</th><td>
+                        <select id="beitrag-manual-symbol" aria-label="Symbol auswählen"><option value="">– Symbol auswählen –</option>
+                            <?php foreach (beitragseinreichung_symbol_pool() as $key => $item): ?><option value="<?php echo esc_attr($key); ?>"><?php echo esc_html($item['label']); ?></option><?php endforeach; ?>
+                        </select>
+                        <button type="button" id="beitrag-insert-symbol" class="button">An Textposition einfügen</button>
+                        <p class="description">Am besten vor eine Zwischenüberschrift oder eine kurze Hervorhebung setzen.</p>
+                    </td></tr>
+                <?php endif; ?>
                 <?php if ($excerpt_aktiv): ?>
                     <tr id="textauszug-zeile">
                         <th><label for="beitrag_excerpt">Textauszug</label></th>
@@ -102,6 +113,7 @@ function beitragseinreichung_formular_anzeige()
                                             }
                                             ?>
                                         </select>
+                                        <img id="beitrag-style-icon" width="24" height="24" alt="" hidden>
                                     <p id="stilgruppe-zieltext" style="font-size:0.9em; color:#900000;"></p>
                                     </p>
                                     <p>
@@ -209,8 +221,12 @@ function beitragseinreichung_formular_anzeige()
 
             <p class="submit beitrag-submit-actions">
                 <button type="button" id="beitrag-preview-button" class="button button-secondary">Vorschau erstellen</button>
-                <button type="submit" id="beitrag-submit-final" class="button button-primary">Beitrag einreichen</button>
+                <button type="submit" id="beitrag-submit-final" class="button button-primary" name="beitrag_save_action" value="<?php echo beitragseinreichung_submission_status('complete') === 'draft' ? 'draft' : 'complete'; ?>" data-save-action="<?php echo beitragseinreichung_submission_status('complete') === 'draft' ? 'draft' : 'complete'; ?>" data-require-image="<?php echo beitragseinreichung_submission_status('complete') === 'publish' && get_option('beitragseinreichung_require_featured_image', 0) ? '1' : '0'; ?>"><?php echo esc_html(beitragseinreichung_completion_label()); ?></button>
+                <?php if (beitragseinreichung_submission_status('complete') !== 'draft'): ?>
+                    <button type="submit" class="button" data-save-action="draft" name="beitrag_save_action" value="draft">Als Entwurf speichern</button>
+                <?php endif; ?>
             </p>
+            <p id="beitrag-publish-image-hint" class="description" hidden>Zum Veröffentlichen bitte ein Beitragsbild auswählen. Vorschau und Entwurf sind bereits möglich.</p>
             <div id="submit-loader" style="display:none;">
                 <div class="submit-loader-inner">
                     <div class="submit-loader-bar"></div>
@@ -230,12 +246,12 @@ function beitragseinreichung_formular_anzeige()
             </div>
         </form>
         <p style="margin-top: 40px; font-size: 0.95em;">
-            ℹ️ <a href="https://github.com/jan-erbert/ai-beitragseinreichung/wiki/Beitrag-einreichen" target="_blank" rel="noopener noreferrer">
+            ℹ️ <a href="https://github.com/jan-erbert/ai-beitragseinreichung-wordpress/wiki/Beitrag-einreichen" target="_blank" rel="noopener noreferrer">
                 Anleitung zur Beitragseinreichung im Wiki anzeigen →
             </a>
         </p>
         <p style="margin-top: 8px; font-size: 0.95em;">
-            🐞 <a href="https://github.com/jan-erbert/ai-beitragseinreichung/issues" target="_blank" rel="noopener noreferrer">
+            🐞 <a href="https://github.com/jan-erbert/ai-beitragseinreichung-wordpress/issues" target="_blank" rel="noopener noreferrer">
                 Fehler oder Problem im GitHub-Issue-Tracker melden →
             </a>
         </p>
@@ -243,6 +259,20 @@ function beitragseinreichung_formular_anzeige()
             AI Beitragseinreichung <?php echo esc_html('v' . BEITRAGSEINREICHUNG_VERSION); ?>
         </p>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const button = document.getElementById('beitrag-insert-symbol');
+            if (!button) return;
+            button.addEventListener('click', function () {
+                const key = document.getElementById('beitrag-manual-symbol').value;
+                if (!key) return;
+                const field = document.getElementById('beitrag_inhalt');
+                field.setRangeText('[[symbol:' + key + ']] ', field.selectionStart, field.selectionEnd, 'end');
+                field.dispatchEvent(new Event('input', {bubbles:true}));
+                field.focus();
+            });
+        });
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const select = document.getElementById('beitrag_ki_stilgruppe');
@@ -257,6 +287,12 @@ function beitragseinreichung_formular_anzeige()
             function updateZieltext() {
                 const selectedStil = select.value;
                 const gruppe = stilgruppen.find(g => g.label === selectedStil);
+                const icon = document.getElementById('beitrag-style-icon');
+                const pool = <?php echo wp_json_encode(beitragseinreichung_symbol_pool()); ?>;
+                const enabled = <?php echo get_option('beitragseinreichung_symbols_enabled', 0) ? 'true' : 'false'; ?>;
+                const item = gruppe && pool[gruppe.icon];
+                icon.hidden = !enabled || !item;
+                if (!icon.hidden) icon.src = <?php echo wp_json_encode($plugin_url . 'assets/lucide/icons/'); ?> + item.icon + '.svg';
                 if (gruppe && gruppe.ziel) {
                     zielAnzeigen.textContent = "Stilgruppen Ziel: " + gruppe.ziel;
                 } else {

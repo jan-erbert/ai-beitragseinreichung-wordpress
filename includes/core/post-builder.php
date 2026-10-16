@@ -141,7 +141,7 @@ function beitragseinreichung_get_benachrichtigung_emails()
 /**
  * Sendet die Benachrichtigung zu einer neuen Beitragseinreichung.
  */
-function beitragseinreichung_sende_beitrag_benachrichtigung($beitrag_id, $titel, $inhalt, $ki_aktiv, $modell, $zusatz, $excerpt = '', $gallery_ids = '')
+function beitragseinreichung_sende_beitrag_benachrichtigung($beitrag_id, $titel, $inhalt, $ki_aktiv, $modell, $zusatz, $excerpt = '', $gallery_ids = '', $style_group = '')
 {
     $emails = beitragseinreichung_get_benachrichtigung_emails();
 
@@ -149,6 +149,8 @@ function beitragseinreichung_sende_beitrag_benachrichtigung($beitrag_id, $titel,
         return;
     }
 
+    $published = get_post_status($beitrag_id) === 'publish';
+    $status_label = $published ? 'Veröffentlicht' : 'In Verarbeitung';
     $ki_info = $ki_aktiv ? 'Ja' : 'Nein';
     $modell_info = $ki_aktiv ? beitrag_get_ai_model_display_name($modell) : '–';
     $autor = get_user_by('ID', (int) get_post_field('post_author', $beitrag_id));
@@ -176,15 +178,16 @@ function beitragseinreichung_sende_beitrag_benachrichtigung($beitrag_id, $titel,
     $mail_html .= '<h1 style="margin:0;font-size:26px;line-height:1.25;">' . esc_html($titel) . '</h1>';
     $mail_html .= '</div>';
     $mail_html .= '<div style="padding:22px;">';
-    $mail_html .= '<p style="margin:0 0 16px;color:#50575e;">Der Beitrag wurde gespeichert und wartet auf Prüfung.</p>';
+    $mail_html .= '<p style="margin:0 0 16px;color:#50575e;">' . esc_html($published ? 'Der Beitrag wurde veröffentlicht.' : 'Der Beitrag wurde gespeichert und wartet auf Prüfung.') . '</p>';
 
     if ($featured_image) {
         $mail_html .= '<div style="margin:0 0 18px;">' . $featured_image . '</div>';
     }
 
     $mail_html .= '<table style="width:100%;border-collapse:collapse;margin:0 0 20px;font-size:14px;">';
-    $mail_html .= beitragseinreichung_render_mail_meta_row('Status', 'In Verarbeitung');
+    $mail_html .= beitragseinreichung_render_mail_meta_row('Status', $status_label);
     $mail_html .= beitragseinreichung_render_mail_meta_row('Autor', $autor_name);
+    $mail_html .= beitragseinreichung_render_mail_meta_row('Stilgruppe / Beitragsart', $style_group);
     $mail_html .= beitragseinreichung_render_mail_meta_row('Kategorie', implode(', ', $kategorien));
     $mail_html .= beitragseinreichung_render_mail_meta_row('Schlagwörter', implode(', ', $tags));
     $mail_html .= beitragseinreichung_render_mail_meta_row('KI-Optimiert', $ki_info);
@@ -219,11 +222,11 @@ function beitragseinreichung_sende_beitrag_benachrichtigung($beitrag_id, $titel,
 
     $mail_html .= '</div></div></div></body></html>';
 
-    wp_mail(
+    beitragseinreichung_queue_notification(
+        $beitrag_id,
         $emails,
         '📝 Neuer Beitrag: ' . $titel,
-        $mail_html,
-        ['Content-Type: text/html; charset=UTF-8']
+        $mail_html
     );
 }
 

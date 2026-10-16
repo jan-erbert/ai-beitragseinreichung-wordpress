@@ -251,6 +251,13 @@ add_action('wp_ajax_beitragseinreichung_preview_beitrag', function () {
         wp_send_json_error(['message' => implode(' ', $validation_errors)]);
     }
 
+    if (!empty($input['ki_active'])) {
+        $error = beitragseinreichung_ai_input_error($input['content'], $input['ai_hint'], $input['change_request']);
+        if ($error !== '') {
+            wp_send_json_error(['message' => $error]);
+        }
+    }
+
     $beitrag_ki_fehler = false;
     $beitrag_ki_fehler_meldung = '';
     $beitrag_ki_admin_benachrichtigung_unterdruecken = true;

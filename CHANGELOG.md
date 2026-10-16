@@ -1,5 +1,40 @@
 # Changelog – AI Beitragseinreichung
 
+## Version 1.3.0 – 2026-10-16
+
+**Added:**
+
+- Einmalige, benutzergebundene Speicher-Tokens mit Sperren für parallele Einreichungen und gespeicherter Quittung für wiederholte POSTs.
+- Einstellbarer Abschlussmodus: zur Prüfung einreichen oder mit nativer WordPress-Berechtigung direkt veröffentlichen; Entwurf als separate Alternative.
+- Optionale Beitragsbild-Pflicht beim Veröffentlichen über das Einreichungsformular, mit Hinweis im Formular und serverseitiger Prüfung.
+- Konfigurierbare KI-Grenzen: mindestens 30 Wörter, maximal 40.000 Zeichen und höchstens 20 Anfragen je Benutzer und Stunde als Vorgaben.
+- Gespeicherter Mailstand und Versandstatus je Empfänger im Beitragseditor; bis zu drei Versuche für eindeutig fehlgeschlagene Übergaben über WP-Cron.
+- Separate Capabilities `beitragseinreichung_view_log` und `beitragseinreichung_delete_log`, einschließlich einmaliger Migration bisheriger Rollenzugriffe.
+- Optionaler lokaler Lucide-Symbolpool mit zwei neutralen Vorgaben, Namensprüfung, manueller Einfügehilfe und Freigabe je Stilgruppe für die KI.
+- Optionales Erkennungssymbol je Stilgruppe; Symbolauswahl wird beim Stilgruppen-Import/Export mitgeführt.
+- Regressionstests für Speicherfehler, fremde/verbrauchte Vorschauen, doppelte Einreichungen, Veröffentlichungsrechte, KI-Limits, Mailwiederholungen und Symbolfreigaben.
+
+**Changed:**
+
+- Beiträge werden zunächst vollständig als Entwurf angelegt; erst danach wird der gewählte Abschlussstatus gesetzt.
+- Entwurf ohne vorhandene Vorschau speichert den Ausgangstext ohne neuen KI-Aufruf. Entwürfe lösen keine Einreichungsbenachrichtigung aus.
+- Benachrichtigungsmails zeigen den tatsächlichen Abschlussstatus und die gewählte Stilgruppe / Beitragsart.
+- Erfolgreich an den Maildienst übergebene Empfänger werden bei Wiederholungen ausgelassen. Unklare, unterbrochene Versandversuche werden nicht automatisch wiederholt.
+- Repository in `ai-beitragseinreichung-wordpress` umbenannt; Repository- und Wiki-Verweise angepasst. Installationsordner und Release-Slug `wp-ai-form` bleiben stabil.
+
+**Fixed:**
+
+- Fehlende oder abgelaufene serverseitige Vorschauen werden abgelehnt, statt versteckte Vorschau-Felder als Ersatz zu akzeptieren.
+- Vorschauen bleiben bei fehlgeschlagener Beitragserstellung verfügbar; `wp_insert_post()` liefert nun auswertbare Fehler.
+- Beitragsbild und Zusatzbilder werden auf vorhandene Bilddateien und native Leseberechtigung geprüft.
+- Die Formularvorschau für Beitragsbilder funktioniert auch ohne erzeugte Thumbnail-Größe.
+
+**Notes:**
+
+- Standard bleibt die bisherige Prüfung; Symbole und Beitragsbild-Pflicht sind zunächst deaktiviert.
+- „An Maildienst übergeben“ ist keine Zustellbestätigung. WP-Cron muss für automatische Wiederholungen laufen.
+- Ein unerwarteter Prozessabbruch während der Speicherung oder des Mailversands erfordert eine manuelle Prüfung, statt blind erneut zu speichern oder zu senden.
+
 ## Version 1.2.6 – 2026-09-09
 
 **Added:**

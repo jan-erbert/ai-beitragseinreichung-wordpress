@@ -6,17 +6,22 @@ defined('ABSPATH') || exit;
  * Registriert die Admin-Menuepunkte des Plugins.
  */
 add_action('admin_menu', function () {
-    if (current_user_can('beitragseinreichung_submit') || current_user_can('beitragseinreichung_settings')) {
+    if (current_user_can('beitragseinreichung_submit') || current_user_can('beitragseinreichung_settings') || current_user_can('beitragseinreichung_view_log')) {
         add_menu_page(
             'Beitrag einreichen',
             'Beitrag einreichen',
             'read',
             'beitragseinreichung',
             function () {
-                if (!current_user_can('beitragseinreichung_submit')) {
+                if (current_user_can('beitragseinreichung_submit')) {
+                    beitragseinreichung_formular_anzeige();
+                } elseif (current_user_can('beitragseinreichung_settings')) {
+                    beitragseinreichung_einstellungen_anzeige();
+                } elseif (current_user_can('beitragseinreichung_view_log')) {
+                    beitragseinreichung_ki_log_anzeige();
+                } else {
                     wp_die(esc_html__('Du hast keine Berechtigung, diese Seite zu sehen.'));
                 }
-                beitragseinreichung_formular_anzeige();
             },
             'dashicons-edit',
             20
@@ -34,12 +39,12 @@ add_action('admin_menu', function () {
         );
     }
 
-    if (current_user_can('beitragseinreichung_submit')) {
+    if (current_user_can('beitragseinreichung_view_log')) {
         add_submenu_page(
             'beitragseinreichung',
             'KI-Protokoll',
             'KI-Protokoll',
-            'beitragseinreichung_submit',
+            'beitragseinreichung_view_log',
             'beitragseinreichung_ki_protokoll',
             'beitragseinreichung_ki_log_anzeige'
         );

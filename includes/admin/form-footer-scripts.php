@@ -21,6 +21,13 @@ add_action('admin_footer', function () {
             let frame_featured, frame_gallery;
             let allowProgrammaticSubmit = false;
 
+            function updatePublishAvailability() {
+                const blocked = $('#beitrag-submit-final').attr('data-require-image') === '1' && !$('#beitragsbild_id').val();
+                $('#beitrag-submit-final').prop('disabled', blocked);
+                $('#beitrag-publish-image-hint').prop('hidden', !blocked);
+            }
+            updatePublishAvailability();
+
             function showDecisionModal(options) {
                 const settings = $.extend({
                     title: 'Hinweis',
@@ -317,8 +324,8 @@ add_action('admin_footer', function () {
                 $('#beitrag-preview-button').prop('hidden', false);
             }
 
-            function getValidationError() {
-                if ($('#beitrag_ki_individuell').is(':checked') && !$('#beitrag_ki_stilgruppe').val()) {
+            function getValidationError(isDraft = false) {
+                if (!isDraft && $('#beitrag_ki_individuell').is(':checked') && !$('#beitrag_ki_stilgruppe').val()) {
                     return 'Bitte wähle einen Stil aus der Liste.';
                 }
 
@@ -330,7 +337,7 @@ add_action('admin_footer', function () {
                 const aiTagsEnabled = String($('#beitrag-tag-editor-wrap').data('ai-tags-enabled')) === '1';
                 const aiTagsActive = $('#beitrag_ki_individuell').is(':checked') && aiTagsEnabled && $('#beitrag_ki_tags_auto').is(':checked');
 
-                if (!title || !content || (!aiTagsActive && !tags) || !category) {
+                if (!title || !content || (!isDraft && !aiTagsActive && !tags) || !category) {
                     return 'Bitte fülle alle Pflichtfelder aus: Titel, Inhalt, Schlagwörter und Kategorie.';
                 }
 
@@ -473,7 +480,7 @@ add_action('admin_footer', function () {
 
                 $('#beitrag-preview-panel').prop('hidden', false);
                 $('#beitrag-preview-button').prop('hidden', true);
-                $('#beitrag-submit-final').prop('disabled', false);
+                updatePublishAvailability();
                 $('html, body').animate({
                     scrollTop: $('#beitrag-preview-panel').offset().top - 40
                 }, 400);
@@ -582,7 +589,8 @@ add_action('admin_footer', function () {
                 frame_featured.on('select', function() {
                     const attachment = frame_featured.state().get('selection').first().toJSON();
                     $('#beitragsbild_id').val(attachment.id);
-                    $('#beitragsbild_preview').html('<img src="' + attachment.sizes.thumbnail.url + '" style="max-width:150px;">');
+                    updatePublishAvailability();
+                    $('#beitragsbild_preview').html('<img src="' + (attachment.sizes && attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url) + '" style="max-width:150px;">');
                     markPreviewDirty();
                 });
 
@@ -628,7 +636,7 @@ add_action('admin_footer', function () {
                     }).appendTo(preview);
 
                     attachments.forEach(function(attachment) {
-                        const thumb = attachment.sizes && attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
+                        const thumb = attachment.sizes && attachment.sizes.thumbnail ? (attachment.sizes && attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url) : attachment.url;
                         $('<img />', {
                             src: thumb,
                             alt: attachment.alt || attachment.title || 'Ausgewähltes Zusatzbild'
@@ -660,6 +668,10 @@ add_action('admin_footer', function () {
                 }
             });
 
+            $(document).on('click', '[data-save-action]', function () {
+                $('#beitrag_save_action').val($(this).attr('data-save-action'));
+            });
+
             $(document).on('submit', '#beitragseinreichung-formular', async function(e) {
                 if (allowProgrammaticSubmit) {
                     allowProgrammaticSubmit = false;
@@ -667,8 +679,12 @@ add_action('admin_footer', function () {
                 }
 
                 e.preventDefault();
+                const submitter = e.originalEvent && e.originalEvent.submitter;
+                const saveAction = (submitter ? submitter.dataset.saveAction : $('#beitrag_save_action').val()) === 'draft' ? 'draft' : 'complete';
+                $('#beitrag_save_action').val(saveAction);
+                const actionLabel = saveAction === 'draft' ? 'Als Entwurf speichern' : $('#beitrag-submit-final').text();
 
-                const validationError = getValidationError();
+                const validationError = getValidationError(saveAction === 'draft');
                 if (validationError) {
                     await showInfoModal('Eingaben unvollständig', validationError);
                     return;
@@ -676,14 +692,15 @@ add_action('admin_footer', function () {
 
                 const warnings = getDirectSubmitWarnings();
                 const confirmed = await showDecisionModal({
-                    title: $('#beitrag_preview_ready').val() === '1' ? 'Beitrag einreichen?' : 'Ohne Vorschau einreichen?',
-                    message: warnings.length ? 'Bitte lies die Hinweise, bevor du den Beitrag speicherst.' : 'Der Beitrag wird jetzt gespeichert und zur Prüfung abgelegt.',
+                    title: actionLabel + '?',
+                    message: warnings.length ? 'Bitte lies die Hinweise, bevor du den Beitrag speicherst.' : 'Der Beitrag wird mit der gewählten Aktion gespeichert.',
                     details: warnings,
-                    confirmText: 'Beitrag einreichen',
+                    confirmText: actionLabel,
                     cancelText: 'Zurück zum Formular'
                 });
 
                 if (!confirmed) {
+                    $('#beitrag_save_action').val('complete');
                     return;
                 }
 
@@ -704,6 +721,7 @@ add_action('admin_footer', function () {
                 }
 
                 allowProgrammaticSubmit = true;
+                $(this).find('button[type=submit]').prop('disabled', true);
                 this.submit();
             });
 

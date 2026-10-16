@@ -48,6 +48,8 @@ Bei jeder Aenderung an Formularen, AJAX-Endpunkten oder gespeicherten Optionen p
   - `beitragseinreichung_submit`
   - `beitragseinreichung_settings`
   - `beitragseinreichung_admin`
+  - `beitragseinreichung_view_log`
+  - `beitragseinreichung_delete_log`
 - Eingaben passend sanitizen, z. B. `sanitize_text_field()`, `sanitize_textarea_field()`, `intval()`, `array_map()`.
 - Ausgaben passend escapen, z. B. `esc_html()`, `esc_attr()`, `esc_url()`, `wp_kses_post()`.
 - Keine API-Keys, Tokens oder vollstaendige Secret-Werte ausgeben.
@@ -154,3 +156,12 @@ Bei WordPress-spezifischen Aenderungen zusaetzlich im Adminbereich testen:
 - Beitragseinreichungsformular oeffnen.
 - Formular mit und ohne KI testen, falls betroffen.
 - AJAX-Funktionen testen, falls betroffen.
+
+## 11. Speicher- und Versandzustand ab Version 1.3.0
+
+- Vorschau-Tokens sind benutzergebunden; fehlende Vorschauen niemals durch versteckte POST-Inhalte ersetzen.
+- Formular- und Vorschau-Sperren sowie Speicherquittungen respektieren. Bei unbekanntem Zustand keine automatische zweite Beitragserstellung.
+- Mailstände liegen als geschützte Beitragsmetadaten vor. `accepted` und unklare `sending`-Versuche niemals blind wiederholen.
+- `composer run test:workflow` prüft die Zustandsabläufe ohne WordPress-Server, echte KI-Aufrufe oder Mailversand.
+- Lokale Lucide-Dateien sind mitgelieferte Bibliotheksdateien; Herkunft und ISC-Lizenz in `assets/lucide/` erhalten.
+- Das verschachtelte, ignorierte `wiki/` ist ein separates Git-Repository. Änderungen und Pushes dort getrennt prüfen.

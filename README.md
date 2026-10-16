@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Version** | 1.2.6 |
+| **Version** | 1.3.0 |
 | **Autor** | Jan Erbert |
-| **Letztes Update** | 2026-09-09 |
+| **Letztes Update** | 2026-10-16 |
 | **Lizenz** | GPL-2.0-or-later |
 
-**AI Beitragseinreichung** ist ein WordPress-Plugin, mit dem berechtigte Nutzer im Backend Beiträge vorbereiten und zur Prüfung einreichen können. Beiträge werden mit dem Status **in Verarbeitung** gespeichert und können anschließend von Admins oder Redakteuren kontrolliert, bearbeitet und veröffentlicht werden.
+**AI Beitragseinreichung** ist ein WordPress-Plugin, mit dem berechtigte Nutzer im Backend Beiträge vorbereiten und zur Prüfung einreichen können. Standardmäßig werden Beiträge zur Prüfung im Status **in Verarbeitung** gespeichert. Alternativ kann direktes Veröffentlichen eingestellt werden, wenn der Nutzer das WordPress-Recht `publish_posts` besitzt. Das Speichern als Entwurf bleibt möglich.
 
 Das Plugin unterstützt Titel, Inhalt, Kategorie, Schlagwörter, Beitragsbild, Zusatzbilder, Vorschau, Benachrichtigungen und optional eine KI-gestützte Überarbeitung über die OpenAI API.
 
@@ -41,7 +41,7 @@ Das Plugin unterstützt Titel, Inhalt, Kategorie, Schlagwörter, Beitragsbild, Z
 5. Der Beitrag wird über **Vorschau erstellen** geprüft.
 6. Bei Bedarf wird ein Änderungswunsch an die KI gesendet.
 7. Der Beitrag wird final eingereicht.
-8. Admins oder Redakteure prüfen den Beitrag im Status **in Verarbeitung**.
+8. Je nach Abschlussmodus wird der Beitrag zur Prüfung gespeichert oder veröffentlicht. Ein Entwurf bleibt als Alternative möglich.
 
 Die Vorschau wird empfohlen, weil sie Titel, Text, Schlagwörter und Bilder vor dem Speichern sichtbar macht.
 
@@ -184,12 +184,42 @@ Das Plugin nutzt eigene Capabilities:
 | Capability | Bedeutung |
 |------------|-----------|
 | `beitragseinreichung_submit` | Formular öffnen und Beiträge einreichen |
+| `beitragseinreichung_view_log` | KI-Protokoll lesen |
+| `beitragseinreichung_delete_log` | Einträge löschen, zusätzlich ist das Leserecht erforderlich |
 | `beitragseinreichung_settings` | Plugin-Einstellungen öffnen |
-| `beitragseinreichung_admin` | Erweiterte Adminfunktionen, z. B. Protokolle löschen |
+| `beitragseinreichung_admin` | Technische Adminfunktionen, z. B. API-Key-Verwaltung |
 
 Die Rechte können z. B. mit dem WordPress-Plugin **Members** verwaltet werden.
 
 ---
+
+## Zuverlässige Speicherung und Mailversand
+
+Vorschauen werden benutzergebunden für 30 Minuten auf dem Server gespeichert. Abgelaufene Vorschauen müssen neu erstellt werden; versteckte Formularfelder ersetzen sie nicht. Ein Formular ist zwölf Stunden gültig. Einmaltokens, atomare Sperren und eine 24 Stunden gespeicherte Quittung verhindern wiederholte Beitragserstellung durch denselben Speichervorgang. Nach einem Speicherfehler bleibt die Vorschau erhalten.
+
+Unter **Einstellungen → Abschluss der Einreichung** wird genau eine Hauptaktion gewählt: Prüfung oder direkte Veröffentlichung. Ohne `publish_posts` wird im Veröffentlichungsmodus nur ein Entwurf angeboten. Die optionale Beitragsbild-Pflicht gilt beim Veröffentlichen über dieses Formular; sie ersetzt keine seitenweite Veröffentlichungsregel im normalen WordPress-Editor. Entwürfe lösen keine Benachrichtigung aus und können ohne neue KI-Verarbeitung gespeichert werden.
+
+Benachrichtigungen speichern Inhalt und Empfänger als festen Mailstand am Beitrag. Unter **Beitragseinreichung: Mailversand** im Beitragseditor stehen die Versandstände je Adresse. Nur eindeutig fehlgeschlagene Übergaben werden über WP-Cron nach fünf Minuten erneut versucht, insgesamt höchstens dreimal. Bereits erfolgreiche oder unklare, abgebrochene Versuche werden nicht wiederholt. „An Maildienst übergeben“ bestätigt keine Zustellung. Für bereits vor Version 1.3.0 gespeicherte Beiträge werden keine Benachrichtigungen nachträglich erzeugt.
+
+## KI-Grenzen
+
+Die Vorgaben sind 30 Wörter Mindestlänge, 40.000 Zeichen Maximallänge und 20 KI-Anfragen pro Benutzer innerhalb einer Stunde ab der ersten Anfrage. Die Werte sind einstellbar; auch erneute KI-Überarbeitungen zählen. Lange Zusatzhinweise werden ebenfalls begrenzt. Eine manuelle Vorschau benötigt keine KI-Anfrage.
+
+## Optionaler lokaler Symbolpool
+
+Die Funktion ist standardmäßig aus. Zwei neutrale Symbole (**Information** und **Veranstaltung**) sind vorbereitet. Der lokale Katalog enthält Lucide Static 1.58.0 unter ISC-Lizenz; siehe [Herkunft](assets/lucide/SOURCE.txt) und [Lizenz](assets/lucide/LICENSE). Zur Laufzeit werden keine Symbole von einem CDN geladen.
+
+Der Pool wird in den Einstellungen gepflegt. Jede Zeile enthält:
+
+```text
+kennung | lucide-name | Bezeichnung | Verwendung
+info | info | Information | Wichtige sachliche Hinweise
+termin | calendar-days | Veranstaltung | Termine und Veranstaltungen
+```
+
+Der Lucide-Name lässt sich mit lokaler Suche und Vorschau nachschlagen. Unbekannte Namen und doppelte Kennungen werden zurückgewiesen. Pro Stilgruppe wählst du ein optionales Erkennungssymbol und per Checkbox die für die KI erlaubten Symbole. Die KI kennt Bedeutung und Verwendung und darf nur freigegebene Marker ausgeben; eigene SVGs oder externe Bildadressen sind ausgeschlossen.
+
+Im manuellen Formular setzt **Symbol einfügen** beispielsweise `[[symbol:info]]` an die Cursorposition. Vorschau, gespeicherter Beitrag und Mail verwenden dieselbe Darstellung. Stilgruppen-Import/Export übernimmt Symbolkennungen; auf einer anderen Installation muss der passende Symbolpool ebenfalls angelegt sein. Beim Deaktivieren verschwinden bereits als Bilder gespeicherte Symbole nicht rückwirkend.
 
 ## Voraussetzungen
 
@@ -248,18 +278,18 @@ composer run build:release
 
 Weitere Informationen stehen im GitHub-Wiki:
 
-- [Installation und Einrichtung](https://github.com/jan-erbert/ai-beitragseinreichung/wiki/Installation)
-- [Formular-Übersicht](https://github.com/jan-erbert/ai-beitragseinreichung/wiki/Formular-%C3%9Cbersicht)
-- [Beitrag einreichen](https://github.com/jan-erbert/ai-beitragseinreichung/wiki/Beitrag-einreichen)
-- [Gute Beiträge schreiben](https://github.com/jan-erbert/ai-beitragseinreichung/wiki/Gute-Beitr%C3%A4ge)
-- [KI-Funktionen](https://github.com/jan-erbert/ai-beitragseinreichung/wiki/KI-Funktionen)
-- [Einstellungen](https://github.com/jan-erbert/ai-beitragseinreichung/wiki/Einstellungen)
-- [Stilgruppen](https://github.com/jan-erbert/ai-beitragseinreichung/wiki/Stilgruppen)
-- [Benutzerrechte und Rollen](https://github.com/jan-erbert/ai-beitragseinreichung/wiki/Benutzerrechte)
-- [Protokoll und Fehlersuche](https://github.com/jan-erbert/ai-beitragseinreichung/wiki/Protokoll)
-- [Entwicklung und Roadmap](https://github.com/jan-erbert/ai-beitragseinreichung/wiki/Entwicklung)
+- [Installation und Einrichtung](https://github.com/jan-erbert/ai-beitragseinreichung-wordpress/wiki/Installation)
+- [Formular-Übersicht](https://github.com/jan-erbert/ai-beitragseinreichung-wordpress/wiki/Formular-%C3%9Cbersicht)
+- [Beitrag einreichen](https://github.com/jan-erbert/ai-beitragseinreichung-wordpress/wiki/Beitrag-einreichen)
+- [Gute Beiträge schreiben](https://github.com/jan-erbert/ai-beitragseinreichung-wordpress/wiki/Gute-Beitr%C3%A4ge)
+- [KI-Funktionen](https://github.com/jan-erbert/ai-beitragseinreichung-wordpress/wiki/KI-Funktionen)
+- [Einstellungen](https://github.com/jan-erbert/ai-beitragseinreichung-wordpress/wiki/Einstellungen)
+- [Stilgruppen](https://github.com/jan-erbert/ai-beitragseinreichung-wordpress/wiki/Stilgruppen)
+- [Benutzerrechte und Rollen](https://github.com/jan-erbert/ai-beitragseinreichung-wordpress/wiki/Benutzerrechte)
+- [Protokoll und Fehlersuche](https://github.com/jan-erbert/ai-beitragseinreichung-wordpress/wiki/Protokoll)
+- [Entwicklung und Roadmap](https://github.com/jan-erbert/ai-beitragseinreichung-wordpress/wiki/Entwicklung)
 
-Repository: [jan-erbert/ai-beitragseinreichung](https://github.com/jan-erbert/ai-beitragseinreichung)
+Repository: [jan-erbert/ai-beitragseinreichung-wordpress](https://github.com/jan-erbert/ai-beitragseinreichung-wordpress)
 
 ---
 

@@ -38,7 +38,8 @@
       "@test:tags",
       "@test:submission",
       "@test:logging",
-      "@test:connection"
+      "@test:connection",
+      "@test:workflow"
     ],
     "check": [
       "@validate:composer",
@@ -47,6 +48,7 @@
       "@phpcs",
       "@test"
     ],
-    "build:release": "bash scripts/build-release.sh"
+    "build:release": "bash scripts/build-release.sh",
+    "test:workflow": "php tests/workflow-smoke.php"
   }
 }

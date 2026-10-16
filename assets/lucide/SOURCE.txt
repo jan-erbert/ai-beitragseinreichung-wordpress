@@ -1,0 +1,8 @@
+Lucide Static 1.58.0
+https://registry.npmjs.org/lucide-static/-/lucide-static-1.58.0.tgz
+https://lucide.dev/license
+
+2159 original SVG icons under icons/, plus names.json as a local name index.
+Extracted from the versioned Lucide catalog used by AI Beitragseinreichung Drupal.
+Only locally supplied icon names are accepted. No runtime CDN, Node.js or zlib dependency.
+License: ISC; see LICENSE and attribution comments in each SVG.

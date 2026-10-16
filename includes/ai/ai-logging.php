@@ -29,7 +29,7 @@ function beitragseinreichung_trim_ai_logs($limit = null)
 
 // 2. Nur Admins duerfen im Protokoll loeschen
 add_action('wp_ajax_beitragseinreichung_ki_log_loeschen', function () {
-    if (!current_user_can('beitragseinreichung_admin')) {
+    if (!(current_user_can('beitragseinreichung_delete_log') && current_user_can('beitragseinreichung_view_log'))) {
         wp_send_json_error('Keine Berechtigung');
     }
     check_ajax_referer('ki_log_loeschen');
@@ -75,6 +75,9 @@ function beitrag_ki_log_speichern($post_id, $autor_id, $original_titel, $optimie
  */
 function beitragseinreichung_ki_log_anzeige()
 {
+    if (!current_user_can('beitragseinreichung_view_log')) {
+        wp_die(esc_html__('Keine Berechtigung.', 'ai-beitragseinreichung'));
+    }
     $logs = get_option('beitragseinreichung_ki_logs', []);
 
     echo '<div class="wrap">';
@@ -117,7 +120,7 @@ function beitragseinreichung_ki_log_anzeige()
         echo '<td data-label="Stilgruppe">' . esc_html($stilgruppe) . '</td>';
         echo '<td data-label="Aktionen">';
         echo '<button class="button button-primary ki-log-open" type="button" data-target="' . esc_attr($detail_id) . '">Anzeigen</button>';
-        if (current_user_can('beitragseinreichung_admin')) {
+        if ((current_user_can('beitragseinreichung_delete_log') && current_user_can('beitragseinreichung_view_log'))) {
             echo ' <button class="button ki-log-delete" data-index="' . esc_attr($index) . '">Löschen</button>';
         }
         echo '</td>';

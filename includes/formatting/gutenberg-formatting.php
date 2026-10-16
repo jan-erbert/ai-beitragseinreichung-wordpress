@@ -129,7 +129,8 @@ function beitrag_wandle_zu_gutenberg_blocks($text)
 
     $flush_current_lines();
 
-    return implode("\n\n", $blocks);
+    $html = implode("\n\n", $blocks);
+    return function_exists('beitragseinreichung_render_symbols') ? beitragseinreichung_render_symbols($html) : $html;
 }
 
 /**

@@ -30,6 +30,8 @@
         <properties>
             <property name="custom_capabilities" type="array">
                 <element value="beitragseinreichung_submit"/>
+                <element value="beitragseinreichung_view_log"/>
+                <element value="beitragseinreichung_delete_log"/>
                 <element value="beitragseinreichung_settings"/>
                 <element value="beitragseinreichung_admin"/>
             </property>

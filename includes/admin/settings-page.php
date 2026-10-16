@@ -7,6 +7,9 @@ defined('ABSPATH') || exit;
  */
 function beitragseinreichung_einstellungen_anzeige()
 {
+    if (!current_user_can('beitragseinreichung_settings')) {
+        wp_die(esc_html__('Keine Berechtigung.', 'ai-beitragseinreichung'));
+    }
     $ist_admin = current_user_can('beitragseinreichung_admin');
     $settings_notice = '';
     $show_ai_disable_prompt = false;
@@ -31,6 +34,11 @@ function beitragseinreichung_einstellungen_anzeige()
             wp_die(esc_html__('Du hast keine Berechtigung, diese Einstellungen zu speichern.'));
         }
 
+        $workflow_error = beitragseinreichung_validate_workflow_settings($_POST);
+        if (is_wp_error($workflow_error)) {
+            wp_die(esc_html($workflow_error->get_error_message()), '', ['back_link' => true]);
+        }
+        beitragseinreichung_save_workflow_settings($_POST);
         $kategorie = isset($_POST['standard_kategorie']) ? [(int) $_POST['standard_kategorie']] : [];
         $stilgruppen = [];
         $stilgruppe_labels = isset($_POST['stilgruppe_label']) ? array_map('sanitize_text_field', wp_unslash((array) $_POST['stilgruppe_label'])) : [];
@@ -45,7 +53,9 @@ function beitragseinreichung_einstellungen_anzeige()
                     $stilgruppen[] = [
                         'label' => $label,
                         'stil' => $stil,
-                        'ziel' => $ziel
+                        'ziel' => $ziel,
+                        'icon' => sanitize_key(wp_unslash($_POST['stilgruppe_icon'][$i] ?? '')),
+                        'symbols' => array_values(array_intersect(array_keys(beitragseinreichung_symbol_pool()), array_filter(explode(',', sanitize_text_field(wp_unslash($_POST['stilgruppe_symbols'][$i] ?? ''))))))
                     ];
                 }
             }
@@ -137,6 +147,7 @@ function beitragseinreichung_einstellungen_anzeige()
             <?php wp_nonce_field('speichern_beitrag_einstellungen', 'beitrag_einstellungen_nonce'); ?>
 
             <table class="form-table">
+                <?php beitragseinreichung_workflow_settings_fields(); ?>
                 <tr>
                     <th scope="row"><label for="standard_kategorie">Standard-Kategorie</label></th>
                     <td>
@@ -376,6 +387,18 @@ function beitragseinreichung_einstellungen_anzeige()
                                     <input type="text" id="stilgruppe-ziel" class="regular-text">
                                 </p>
 
+                                <p><label for="stilgruppe-icon"><strong>Symbol der Stilgruppe (optional)</strong></label><br>
+                                    <select id="stilgruppe-icon"><option value="">Kein Symbol</option>
+                                        <?php foreach (beitragseinreichung_symbol_pool() as $key => $item): ?><option value="<?php echo esc_attr($key); ?>"><?php echo esc_html($item['label']); ?></option><?php endforeach; ?>
+                                    </select>
+                                </p>
+                                <fieldset id="stilgruppe-symbols"><legend><strong>Für die KI erlaubte Symbole</strong></legend>
+                                    <?php foreach (beitragseinreichung_symbol_pool() as $key => $item): ?>
+                                        <label style="display:inline-flex;align-items:center;gap:6px;margin:6px 12px 6px 0;"><input type="checkbox" value="<?php echo esc_attr($key); ?>">
+                                            <img src="<?php echo esc_url(plugin_dir_url(dirname(__DIR__, 2) . '/wp-form.php') . 'assets/lucide/icons/' . $item['icon'] . '.svg'); ?>" width="22" height="22" alt="">
+                                            <?php echo esc_html($item['label']); ?></label>
+                                    <?php endforeach; ?>
+                                </fieldset>
                                 <div class="beitrag-settings-style-modal__actions">
                                     <button type="button" class="button button-link-delete" id="stilgruppe-loeschen">Löschen</button>
                                     <button type="button" class="button" id="stilgruppe-exportieren">Exportieren</button>
@@ -435,6 +458,9 @@ function beitragseinreichung_einstellungen_anzeige()
 
                         function showEditor(index = null, values = null) {
                             editor.hidden = false;
+                            const symbolValues = values || (index !== null ? stilgruppen[index] : {});
+                            document.getElementById('stilgruppe-icon').value = symbolValues.icon || '';
+                            document.querySelectorAll('#stilgruppe-symbols input').forEach(input => { input.checked = (symbolValues.symbols || []).includes(input.value); });
                             if (index === null) {
                                 auswahl.value = '';
                                 inputLabel.value = values && values.label ? values.label : '';
@@ -530,6 +556,8 @@ function beitragseinreichung_einstellungen_anzeige()
                             const label = inputLabel.value.trim();
                             const stil = inputStil.value.trim();
                             const ziel = document.getElementById('stilgruppe-ziel').value.trim();
+                            const icon = document.getElementById('stilgruppe-icon').value;
+                            const symbols = Array.from(document.querySelectorAll('#stilgruppe-symbols input:checked'), input => input.value);
                             if (!label || !stil) {
                                 await showSettingsDialog({
                                     title: 'Stilgruppe unvollständig',
@@ -544,13 +572,13 @@ function beitragseinreichung_einstellungen_anzeige()
                                 stilgruppen.push({
                                     label,
                                     stil,
-                                    ziel
+                                    ziel, icon, symbols
                                 });
                             } else {
                                 stilgruppen[index] = {
                                     label,
                                     stil,
-                                    ziel
+                                    ziel, icon, symbols
                                 };
                             }
                             updateDropdown();
@@ -567,6 +595,8 @@ function beitragseinreichung_einstellungen_anzeige()
                             const label = typeof value.label === 'string' ? value.label.trim() : '';
                             const stil = typeof value.stil === 'string' ? value.stil.trim() : '';
                             const ziel = typeof value.ziel === 'string' ? value.ziel.trim() : '';
+                            const icon = typeof value.icon === 'string' ? value.icon : '';
+                            const symbols = Array.isArray(value.symbols) ? value.symbols.filter(item => typeof item === 'string') : [];
 
                             if (!label || !stil) {
                                 return null;
@@ -575,7 +605,7 @@ function beitragseinreichung_einstellungen_anzeige()
                             return {
                                 label,
                                 stil,
-                                ziel
+                                ziel, icon, symbols
                             };
                         }
 
@@ -634,7 +664,9 @@ function beitragseinreichung_einstellungen_anzeige()
                             return normalizeStyleGroup({
                                 label: inputLabel.value,
                                 stil: inputStil.value,
-                                ziel: document.getElementById('stilgruppe-ziel').value
+                                ziel: document.getElementById('stilgruppe-ziel').value,
+                                icon: document.getElementById('stilgruppe-icon').value,
+                                symbols: Array.from(document.querySelectorAll('#stilgruppe-symbols input:checked'), input => input.value)
                             });
                         }
 
@@ -765,7 +797,7 @@ function beitragseinreichung_einstellungen_anzeige()
 
                         function syncHiddenInputs() {
                             const form = auswahl.closest('form');
-                            form.querySelectorAll('input[name="stilgruppe_label[]"], input[name="stilgruppe_stil[]"], input[name="stilgruppe_ziel[]"]').forEach(el => el.remove());
+                            form.querySelectorAll('input[name="stilgruppe_label[]"], input[name="stilgruppe_stil[]"], input[name="stilgruppe_ziel[]"], input[name="stilgruppe_icon[]"], input[name="stilgruppe_symbols[]"]').forEach(el => el.remove());
                             stilgruppen.forEach(gruppe => {
                                 const input1 = document.createElement('input');
                                 input1.type = 'hidden';
@@ -782,6 +814,12 @@ function beitragseinreichung_einstellungen_anzeige()
                                 input3.name = 'stilgruppe_ziel[]';
                                 input3.value = gruppe.ziel || '';
                                 form.appendChild(input3);
+                                ['icon', 'symbols'].forEach(key => {
+                                    const hidden = document.createElement('input');
+                                    hidden.type = 'hidden'; hidden.name = 'stilgruppe_' + key + '[]';
+                                    hidden.value = key === 'symbols' ? (gruppe.symbols || []).join(',') : (gruppe.icon || '');
+                                    form.appendChild(hidden);
+                                });
                             });
                         }
 
@@ -887,7 +925,7 @@ function beitragseinreichung_einstellungen_anzeige()
             <?php submit_button('Einstellungen speichern'); ?>
         </form>
         <p style="margin-top: 40px; font-size: 0.95em;">
-            ℹ️ <a href="https://github.com/jan-erbert/ai-beitragseinreichung/wiki" target="_blank" rel="noopener noreferrer">
+            ℹ️ <a href="https://github.com/jan-erbert/ai-beitragseinreichung-wordpress/wiki" target="_blank" rel="noopener noreferrer">
                 Weitere Hilfe & Dokumentation findest du im Plugin-Wiki →
             </a>
         </p>

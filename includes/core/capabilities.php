@@ -14,9 +14,11 @@ function beitragseinreichung_register_role_capabilities()
 
         // Basisrechte zuweisen
         $role->add_cap('beitragseinreichung_submit');
+        $role->add_cap('beitragseinreichung_view_log');
         if ($role_name === 'administrator') {
             $role->add_cap('beitragseinreichung_settings');
             $role->add_cap('beitragseinreichung_admin');
+            $role->add_cap('beitragseinreichung_delete_log');
         }
     }
 }
@@ -44,6 +46,9 @@ function register_ai_beitragseinreichung_caps()
         'label' => __('Beiträge einreichen', 'ai-beitragseinreichung'),
         'group' => 'ai_beitragseinreichung',
     ]);
+    foreach (['beitragseinreichung_view_log' => 'KI-Protokoll lesen', 'beitragseinreichung_delete_log' => 'KI-Protokoll löschen'] as $cap => $label) {
+        members_register_cap($cap, ['label' => $label, 'group' => 'ai_beitragseinreichung']);
+    }
     members_register_cap('beitragseinreichung_settings', [
         'label' => __('Einstellungen verwalten', 'ai-beitragseinreichung'),
         'group' => 'ai_beitragseinreichung',
@@ -53,3 +58,20 @@ function register_ai_beitragseinreichung_caps()
         'group' => 'ai_beitragseinreichung',
     ]);
 }
+
+/** Migriert neue Rechte einmalig und respektiert danach manuelle Rollenaenderungen. */
+add_action('admin_init', function () {
+    if (get_option('beitragseinreichung_caps_version') === '1.3.0') {
+        return;
+    }
+    foreach (wp_roles()->roles as $name => $data) {
+        $role = get_role($name);
+        if (!empty($data['capabilities']['beitragseinreichung_submit'])) {
+            $role->add_cap('beitragseinreichung_view_log');
+        }
+        if (!empty($data['capabilities']['beitragseinreichung_admin'])) {
+            $role->add_cap('beitragseinreichung_delete_log');
+        }
+    }
+    update_option('beitragseinreichung_caps_version', '1.3.0', false);
+});
