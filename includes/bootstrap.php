@@ -23,6 +23,7 @@ require_once plugin_dir_path(__FILE__) . 'admin/assets.php';
 require_once plugin_dir_path(__FILE__) . 'admin/form-footer-scripts.php';
 require_once plugin_dir_path(__FILE__) . 'admin/openai-ajax.php';
 require_once plugin_dir_path(__FILE__) . 'admin/update-popup.php';
+require_once plugin_dir_path(__FILE__) . 'admin/symbol-fields.php';
 require_once plugin_dir_path(__FILE__) . 'admin/workflow-settings.php';
 require_once plugin_dir_path(__FILE__) . 'admin/settings-page.php';
 require_once plugin_dir_path(__FILE__) . 'frontend/gallery-slider.php';

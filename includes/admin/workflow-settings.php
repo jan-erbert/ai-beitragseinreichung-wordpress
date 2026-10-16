@@ -5,8 +5,7 @@ defined('ABSPATH') || exit;
 /** Validiert neue Einstellungen, bevor bestehende Optionen geaendert werden. */
 function beitragseinreichung_validate_workflow_settings(array $source)
 {
-    $text = isset($source['symbol_pool']) ? sanitize_textarea_field(wp_unslash($source['symbol_pool'])) : '';
-    $pool = beitragseinreichung_parse_symbol_pool($text);
+    $pool = beitragseinreichung_symbol_pool_from_input($source);
     return is_wp_error($pool) ? $pool : null;
 }
 
@@ -20,7 +19,7 @@ function beitragseinreichung_save_workflow_settings(array $source)
         update_option('beitragseinreichung_' . $key, max($bounds[1], min($bounds[2], (int) ($source[$key] ?? $bounds[0]))));
     }
     update_option('beitragseinreichung_symbols_enabled', !empty($source['symbols_enabled']) ? 1 : 0);
-    $pool = beitragseinreichung_parse_symbol_pool(sanitize_textarea_field(wp_unslash($source['symbol_pool'] ?? '')));
+    $pool = beitragseinreichung_symbol_pool_from_input($source);
     if (!is_wp_error($pool)) {
         update_option('beitragseinreichung_symbol_pool', $pool);
     }
@@ -48,31 +47,7 @@ function beitragseinreichung_workflow_settings_fields()
     <tr><th scope="row">Lokaler Symbolpool</th><td>
         <label><input type="checkbox" name="symbols_enabled" value="1" <?php checked(get_option('beitragseinreichung_symbols_enabled', 0), 1); ?>> Symbole für manuelle Texte und KI aktivieren</label>
         <p class="description">Optional und standardmäßig deaktiviert. Im Text: <code>[[symbol:info]]</code>. Die KI erhält nur die in der Stilgruppe freigegebenen Symbole. Bilder werden lokal geladen.</p>
-        <details><summary>Symbolpool bearbeiten und Lucide-Namen nachschlagen</summary>
-            <p>Eine Zeile pro Symbol: <code>kennung | lucide-name | Bezeichnung | Verwendung</code>. Zwei neutrale Grundsymbole sind vorbereitet. Maximal 80 Symbole.</p>
-            <textarea id="beitrag-symbol-pool" name="symbol_pool" class="large-text code" rows="7"><?php
-            $lines = [];
-            foreach (beitragseinreichung_symbol_pool() as $key => $item) {
-                $lines[] = $key . ' | ' . $item['icon'] . ' | ' . $item['label'] . ' | ' . $item['usage'];
-            }
-            echo esc_textarea(implode("\n", $lines));
-            ?></textarea>
-            <p><label>Lokalen Lucide-Namen suchen <input type="search" id="beitrag-icon-search" list="beitrag-icon-names" placeholder="z. B. trophy"></label> <img id="beitrag-icon-preview" alt="Symbolvorschau" width="26" height="26" hidden></p>
-            <datalist id="beitrag-icon-names"><?php foreach (beitragseinreichung_icon_names() as $name): ?><option value="<?php echo esc_attr($name); ?>"></option><?php endforeach; ?></datalist>
-            <p class="description">Nach Änderungen am Pool zuerst die Einstellungen speichern, danach Symbole in den Stilgruppen auswählen. Unbekannte Lucide-Namen werden abgelehnt.</p>
-        </details>
-        <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const input = document.getElementById('beitrag-icon-search');
-            const preview = document.getElementById('beitrag-icon-preview');
-            const names = <?php echo wp_json_encode(beitragseinreichung_icon_names()); ?>;
-            const base = <?php echo wp_json_encode(plugin_dir_url(dirname(__DIR__, 2) . '/wp-form.php') . 'assets/lucide/icons/'); ?>;
-            input.addEventListener('input', function () {
-                preview.hidden = !names.includes(input.value);
-                if (!preview.hidden) preview.src = base + input.value + '.svg';
-            });
-        });
-        </script>
+        <?php beitragseinreichung_symbol_manager_fields(); ?>
     </td></tr>
     <tr><th scope="row">Rechte und Mailversand</th><td>
         <p class="description">Beiträge einreichen, KI-Protokoll lesen, KI-Protokoll löschen und Einstellungen verwalten sind getrennte WordPress-Capabilities. Sie lassen sich z. B. mit Members auch eigenen Rollen zuweisen. Beim Upgrade bleiben die bisherigen Zugriffe erhalten.</p>

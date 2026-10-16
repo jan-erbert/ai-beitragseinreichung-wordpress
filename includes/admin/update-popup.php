@@ -119,24 +119,24 @@ add_action('admin_footer', function () {
                 </div>
                 <div>
                     <p class="beitrag-update-popup__eyebrow"><?php echo esc_html(sprintf('Release %s', $version)); ?></p>
-                    <h2 id="beitrag-update-popup-title"><?php echo esc_html__('Zuverlässiger einreichen und gezielter gestalten', 'ai-beitragseinreichung'); ?></h2>
+                    <h2 id="beitrag-update-popup-title"><?php echo esc_html__('Deine Beiträge bekommen mehr Ausdruck', 'ai-beitragseinreichung'); ?></h2>
                 </div>
             </div>
 
-            <p><?php echo esc_html__('Version 1.3.0 ergänzt abgesicherte Speicherung, nachvollziehbaren Mailversand und optionale lokale Symbole.', 'ai-beitragseinreichung'); ?></p>
+            <p><?php echo esc_html__('Neu in Version 1.3.1: Entdecke Symbole mit Vorschau und gestalte Beiträge noch einfacher – ganz ohne Emojis.', 'ai-beitragseinreichung'); ?></p>
 
             <div class="beitrag-update-popup__highlights">
                 <div>
-                    <strong><?php echo esc_html__('Sicherer Abschluss', 'ai-beitragseinreichung'); ?></strong>
-                    <p><?php echo esc_html__('Abgelaufene Vorschauen werden erkannt; doppelte Einreichungen werden verhindert. Entwurf und Abschlussmodus sind klar getrennt.', 'ai-beitragseinreichung'); ?></p>
+                    <strong><?php echo esc_html__('Symbole sehen statt Namen raten', 'ai-beitragseinreichung'); ?></strong>
+                    <p><?php echo esc_html__('Durchstöbere die Vorschaukacheln und wähle das passende Symbol direkt aus. Auch beim Einfügen in deinen Beitrag siehst du vorher, wie es aussieht.', 'ai-beitragseinreichung'); ?></p>
                 </div>
                 <div>
-                    <strong><?php echo esc_html__('Mailversand mit Status', 'ai-beitragseinreichung'); ?></strong>
-                    <p><?php echo esc_html__('Prüfe den Versandstatus im Beitragseditor. Eindeutig fehlgeschlagene Versuche werden begrenzt wiederholt.', 'ai-beitragseinreichung'); ?></p>
+                    <strong><?php echo esc_html__('Deine Symbole, dein Schreibstil', 'ai-beitragseinreichung'); ?></strong>
+                    <p><?php echo esc_html__('Ergänze eigene Symbole und beschreibe, wann sie passen. Du entscheidest, welche davon die Redaktion und die KI für Texte oder Zwischenüberschriften nutzen dürfen.', 'ai-beitragseinreichung'); ?></p>
                 </div>
                 <div>
-                    <strong><?php echo esc_html__('Optionale Symbole und KI-Grenzen', 'ai-beitragseinreichung'); ?></strong>
-                    <p><?php echo esc_html__('Lokale Symbole je Stilgruppe, getrennte Protokollrechte und einstellbare Grenzen für KI-Anfragen.', 'ai-beitragseinreichung'); ?></p>
+                    <strong><?php echo esc_html__('In Ruhe vorbereiten oder direkt teilen', 'ai-beitragseinreichung'); ?></strong>
+                    <p><?php echo esc_html__('Speichere deinen Beitrag als Entwurf oder nutze den für deine Webseite gewählten Abschluss: zur Prüfung einreichen oder direkt veröffentlichen. Die Symbolfunktion bleibt optional.', 'ai-beitragseinreichung'); ?></p>
                 </div>
             </div>
 

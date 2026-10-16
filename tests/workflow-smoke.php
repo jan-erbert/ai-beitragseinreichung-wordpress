@@ -150,4 +150,20 @@ beitrag_test_assert_same('[[symbol:info]] ', beitragseinreichung_filter_ai_symbo
 beitrag_test_assert(strpos(beitragseinreichung_render_symbols('[[symbol:info]]'), '/assets/lucide/icons/info.svg') !== false, 'Lokales Symbol wird nicht ausgegeben.');
 beitrag_test_assert_same('', beitragseinreichung_render_symbols('[[symbol:../script]]'), 'Unbekannte Marker werden ausgegeben.');
 beitrag_test_assert_same('<a title="[[symbol:info]]">Link</a>', beitragseinreichung_render_symbols('<a title="[[symbol:info]]">Link</a>'), 'Symbolmarker verändern HTML-Attribute.');
+
+$decoded_pool = beitragseinreichung_symbol_pool_from_input(['symbol_pool_json' => json_encode(['wandern' => ['icon' => 'footprints', 'label' => 'Wandern', 'usage' => 'Spaziergänge', 'manual' => false, 'ai' => true, 'inline' => false, 'heading' => true]])]);
+beitrag_test_assert_same(false, $decoded_pool['wandern']['manual'], 'Die manuelle Freigabe geht beim Speichern verloren.');
+beitrag_test_assert_same(false, $decoded_pool['wandern']['inline'], 'Die Textfreigabe geht beim Speichern verloren.');
+beitrag_test_assert(is_wp_error(beitragseinreichung_symbol_pool_from_input(['symbol_pool_json' => '{kaputt'])), 'Defektes Popup-JSON wird als leerer Pool gespeichert.');
+beitrag_test_assert(is_wp_error(beitragseinreichung_symbol_pool_from_input(['symbol_pool_json' => '{"test":{"icon":"info","label":"Test","usage":"Test","ai":"false"}}'])), 'Eine uneindeutige Freigabe wird akzeptiert.');
+$legacy_pool = beitragseinreichung_parse_symbol_pool('test | info | Test | Hinweise');
+beitrag_test_assert_same(true, $legacy_pool['test']['ai'], 'Bestehende Symbole verlieren ihre KI-Freigabe.');
+$options['beitragseinreichung_symbol_pool'] = $decoded_pool;
+$options['beitragseinreichung_ki_stilgruppen'] = [['label' => 'Test', 'symbols' => ['wandern']]];
+beitrag_test_assert_same("## [[symbol:wandern]] Wandern\n Absatz", beitragseinreichung_filter_ai_symbols("## [[symbol:wandern]] Wandern\n[[symbol:wandern]] Absatz", 'Test'), 'KI beachtet die Freigabe nur für Zwischenüberschriften nicht.');
+beitrag_test_assert_same('<p></p>', beitragseinreichung_render_symbols('<p>[[symbol:wandern]]</p>'), 'Ein reines Überschriftensymbol wird im Fließtext gerendert.');
+beitrag_test_assert(strpos(beitragseinreichung_render_symbols('<h2>[[symbol:wandern]] Wandern</h2>'), 'footprints.svg') !== false, 'Ein freigegebenes Überschriftensymbol verschwindet.');
+$options['beitragseinreichung_symbol_pool']['wandern']['ai'] = false;
+beitrag_test_assert_same([], beitragseinreichung_group_symbols('Test'), 'Die globale KI-Freigabe wird ignoriert.');
+
 echo "Workflow-Test erfolgreich: Einmaltokens, Vorschauen, Rechte, Speicherfehler, KI-Grenzen, Mailwiederholung und Symbole.\n";

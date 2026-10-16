@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Version** | 1.3.0 |
+| **Version** | 1.3.1 |
 | **Autor** | Jan Erbert |
 | **Letztes Update** | 2026-10-16 |
 | **Lizenz** | GPL-2.0-or-later |
@@ -209,17 +209,15 @@ Die Vorgaben sind 30 Wörter Mindestlänge, 40.000 Zeichen Maximallänge und 20 
 
 Die Funktion ist standardmäßig aus. Zwei neutrale Symbole (**Information** und **Veranstaltung**) sind vorbereitet. Der lokale Katalog enthält Lucide Static 1.58.0 unter ISC-Lizenz; siehe [Herkunft](assets/lucide/SOURCE.txt) und [Lizenz](assets/lucide/LICENSE). Zur Laufzeit werden keine Symbole von einem CDN geladen.
 
-Der Pool wird in den Einstellungen gepflegt. Jede Zeile enthält:
+Unter **Symbolpool mit Vorschau verwalten** öffnet sich ein Popup. Links siehst du deine vorhandenen Symbole als Kacheln, rechts bearbeitest du das ausgewählte Symbol mit großer Vorschau. Über **Neues Symbol** ergänzt du einen Eintrag. Der lokale Lucide-Katalog lässt sich nach Namen durchsuchen; jede Auswahl zeigt das zugehörige Bild.
 
-```text
-kennung | lucide-name | Bezeichnung | Verwendung
-info | info | Information | Wichtige sachliche Hinweise
-termin | calendar-days | Veranstaltung | Termine und Veranstaltungen
-```
+Jedes Symbol hat eine feste Kennung, einen Lucide-Symbolnamen, eine verständliche Bezeichnung und eine Beschreibung, wann es passt. Bei bestehenden Symbolen bleibt die Kennung erhalten. Vier Freigaben steuern die Verwendung: im manuellen Formular verfügbar, für die KI freigegeben, im Text verwendbar und für Zwischenüberschriften verwendbar. **Symbolpool speichern** übernimmt den Pool zusammen mit den übrigen Einstellungen; Abbrechen verwirft nicht gespeicherte Änderungen.
 
-Der Lucide-Name lässt sich mit lokaler Suche und Vorschau nachschlagen. Unbekannte Namen und doppelte Kennungen werden zurückgewiesen. Pro Stilgruppe wählst du ein optionales Erkennungssymbol und per Checkbox die für die KI erlaubten Symbole. Die KI kennt Bedeutung und Verwendung und darf nur freigegebene Marker ausgeben; eigene SVGs oder externe Bildadressen sind ausgeschlossen.
+Pro Stilgruppe wählst du ein optionales Erkennungssymbol und per Checkbox die für die KI erlaubten Symbole. Zusätzlich muss das Symbol im Pool für die KI freigegeben sein. Die KI kennt Bedeutung, Verwendung und erlaubte Positionen. Eigene SVGs oder externe Bildadressen sind ausgeschlossen.
 
-Im manuellen Formular setzt **Symbol einfügen** beispielsweise `[[symbol:info]]` an die Cursorposition. Vorschau, gespeicherter Beitrag und Mail verwenden dieselbe Darstellung. Stilgruppen-Import/Export übernimmt Symbolkennungen; auf einer anderen Installation muss der passende Symbolpool ebenfalls angelegt sein. Beim Deaktivieren verschwinden bereits als Bilder gespeicherte Symbole nicht rückwirkend.
+Im manuellen Formular öffnet **Symbol mit Vorschau auswählen** eine bebilderte Auswahl mit Suche. Ein Klick fügt beispielsweise `[[symbol:info]]` an die Cursorposition ein. Symbole, die nur für Zwischenüberschriften freigegeben sind, können im Fließtext nicht ausgewählt werden. Für eine Markdown-Zwischenüberschrift setze den Cursor hinter `## `. Vorschau, gespeicherter Beitrag und Mail verwenden dieselbe Darstellung.
+
+Stilgruppen-Import/Export übernimmt Symbolkennungen; auf einer anderen Installation muss der passende Symbolpool ebenfalls angelegt sein. Vorhandene Einträge aus Version 1.3.0 bleiben erhalten und starten mit allen bisherigen Freigaben. Beim Deaktivieren verschwinden bereits als Bilder gespeicherte Symbole nicht rückwirkend.
 
 ## Voraussetzungen
 

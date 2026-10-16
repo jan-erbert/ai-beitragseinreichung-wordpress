@@ -30,6 +30,8 @@ add_action('admin_enqueue_scripts', function ($hook) {
         return;
     }
 
+    wp_enqueue_script('beitragseinreichung-symbol-manager', plugin_dir_url(dirname(__DIR__, 2) . '/wp-form.php') . 'assets/js/symbol-manager.js', [], BEITRAGSEINREICHUNG_VERSION, true);
+
     $lottie_path = dirname(__DIR__, 2) . '/assets/js/lottie-player.js';
     $lottie_version = '2.0.1';
     if (file_exists($lottie_path)) {
@@ -51,7 +53,7 @@ add_action('admin_enqueue_scripts', function ($hook) {
     }
 
     $style_path = plugin_dir_path(dirname(__DIR__)) . 'css/style.css';
-    $style_version = defined('BEITRAGSEINREICHUNG_VERSION') ? BEITRAGSEINREICHUNG_VERSION : '1.3.0';
+    $style_version = defined('BEITRAGSEINREICHUNG_VERSION') ? BEITRAGSEINREICHUNG_VERSION : '1.3.1';
     if (file_exists($style_path)) {
         $style_version .= '-' . filemtime($style_path);
     }

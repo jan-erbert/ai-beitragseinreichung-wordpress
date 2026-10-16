@@ -798,3 +798,47 @@
     font-weight: bold;
     margin-left: 4px;
 }
+
+/* Symbolverwaltung: lokal begrenztes Popup im WordPress-Stil. */
+.beitrag-symbol-summary { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+.beitrag-symbol-summary > span { display:flex; align-items:center; gap:8px; padding:8px 12px; border:1px solid #dcdcde; background:#fff; border-radius:4px; }
+.beitrag-symbol-layer { position:fixed; inset:0; z-index:100100; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(0,0,0,.5); box-sizing:border-box; }
+.beitrag-symbol-layer__panel { background:#fff; color:#1d2327; width:min(1120px,100%); max-height:calc(100dvh - 48px); display:flex; flex-direction:column; border-radius:6px; box-shadow:0 12px 48px rgba(0,0,0,.25); overflow:hidden; }
+.beitrag-symbol-layer__header { display:flex; align-items:center; justify-content:space-between; padding:18px 24px; border-bottom:1px solid #dcdcde; }
+.beitrag-symbol-layer__header h2 { margin:0; font-size:20px; line-height:1.4; }
+.beitrag-symbol-layer__close { border:0; background:transparent; cursor:pointer; font-size:30px; line-height:1; padding:4px 8px; color:#50575e; }
+.beitrag-symbol-layer__body { padding:20px 24px; overflow:auto; }
+.beitrag-symbol-layer__footer { display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:10px; padding:16px 24px; border-top:1px solid #dcdcde; background:#f6f7f7; }
+.beitrag-symbol-layer__footer > span { margin-right:auto; }
+.beitrag-symbol-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.1fr); gap:24px; }
+.beitrag-symbol-layout > section { min-width:0; }
+.beitrag-symbol-editor { padding-left:24px; border-left:1px solid #dcdcde; }
+.beitrag-symbol-toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:12px 0; }
+.beitrag-symbol-layer input[type=search] { max-width:100%; width:100%; margin:0; }
+.beitrag-symbol-toolbar input[type=search] { flex:1; width:140px; }
+.beitrag-symbol-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(135px,1fr)); gap:10px; margin:16px 0; }
+.beitrag-symbol-tile { display:flex; flex-direction:column; align-items:flex-start; gap:8px; min-height:110px; padding:14px; border:1px solid #c3c4c7; border-radius:4px; background:#fff; color:#1d2327; cursor:pointer; text-align:left; overflow-wrap:anywhere; font-size:13px; line-height:1.5; }
+.beitrag-symbol-tile:hover { border-color:#2271b1; background:#f0f6fc; }
+.beitrag-symbol-tile[aria-pressed=true] { border-color:#2271b1; box-shadow:inset 0 0 0 1px #2271b1; background:#f0f6fc; }
+.beitrag-symbol-tile > span { color:#50575e; }
+.beitrag-symbol-tile:disabled { opacity:.55; cursor:default; }
+.beitrag-symbol-layer button:focus-visible { outline:2px solid #2271b1; outline-offset:2px; }
+.beitrag-symbol-large-preview { display:flex; align-items:center; gap:16px; min-height:76px; padding:14px; background:#f6f7f7; border:1px solid #dcdcde; border-radius:4px; margin:12px 0 18px; font-size:17px; font-weight:600; }
+.beitrag-symbol-field { display:flex; flex-direction:column; gap:7px; margin:16px 0; }
+.beitrag-symbol-field > input,.beitrag-symbol-field > textarea { width:100%; margin:0; }
+.beitrag-symbol-field input[readonly] { background:#f0f0f1; }
+.beitrag-symbol-flags { margin:18px 0; }
+.beitrag-symbol-flags legend { font-weight:600; margin-bottom:8px; }
+.beitrag-symbol-flags label { display:block; margin:10px 0; }
+.beitrag-symbol-catalog { border:1px solid #dcdcde; padding:12px; border-radius:4px; margin:12px 0 18px; }
+.beitrag-symbol-catalog summary { cursor:pointer; color:#2271b1; font-weight:600; margin-bottom:10px; }
+.beitrag-symbol-catalog .beitrag-symbol-grid { grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); max-height:300px; overflow:auto; padding:3px; }
+.beitrag-symbol-status { color:#1d2327; font-weight:600; }
+@media(max-width:700px) {
+    .beitrag-symbol-layer { padding:10px; }
+    .beitrag-symbol-layer__panel { max-height:calc(100dvh - 20px); }
+    .beitrag-symbol-layout { grid-template-columns:1fr; }
+    .beitrag-symbol-editor { padding-left:0; border-left:0; border-top:1px solid #dcdcde; padding-top:14px; }
+    .beitrag-symbol-layer__body { padding:16px; }
+    .beitrag-symbol-layer__footer { padding:12px 16px; }
+}

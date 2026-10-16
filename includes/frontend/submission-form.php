@@ -48,11 +48,7 @@ function beitragseinreichung_formular_anzeige()
                 </tr>
                 <?php if (get_option('beitragseinreichung_symbols_enabled', 0)): ?>
                     <tr><th>Symbol einfügen</th><td>
-                        <select id="beitrag-manual-symbol" aria-label="Symbol auswählen"><option value="">– Symbol auswählen –</option>
-                            <?php foreach (beitragseinreichung_symbol_pool() as $key => $item): ?><option value="<?php echo esc_attr($key); ?>"><?php echo esc_html($item['label']); ?></option><?php endforeach; ?>
-                        </select>
-                        <button type="button" id="beitrag-insert-symbol" class="button">An Textposition einfügen</button>
-                        <p class="description">Am besten vor eine Zwischenüberschrift oder eine kurze Hervorhebung setzen.</p>
+                        <?php beitragseinreichung_symbol_picker_fields(); ?>
                     </td></tr>
                 <?php endif; ?>
                 <?php if ($excerpt_aktiv): ?>
@@ -259,20 +255,6 @@ function beitragseinreichung_formular_anzeige()
             AI Beitragseinreichung <?php echo esc_html('v' . BEITRAGSEINREICHUNG_VERSION); ?>
         </p>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const button = document.getElementById('beitrag-insert-symbol');
-            if (!button) return;
-            button.addEventListener('click', function () {
-                const key = document.getElementById('beitrag-manual-symbol').value;
-                if (!key) return;
-                const field = document.getElementById('beitrag_inhalt');
-                field.setRangeText('[[symbol:' + key + ']] ', field.selectionStart, field.selectionEnd, 'end');
-                field.dispatchEvent(new Event('input', {bubbles:true}));
-                field.focus();
-            });
-        });
-    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const select = document.getElementById('beitrag_ki_stilgruppe');

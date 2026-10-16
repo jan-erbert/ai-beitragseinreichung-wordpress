@@ -393,7 +393,7 @@ function beitragseinreichung_einstellungen_anzeige()
                                     </select>
                                 </p>
                                 <fieldset id="stilgruppe-symbols"><legend><strong>Für die KI erlaubte Symbole</strong></legend>
-                                    <?php foreach (beitragseinreichung_symbol_pool() as $key => $item): ?>
+                                    <?php foreach (array_filter(beitragseinreichung_symbol_pool(), function ($symbol) { return $symbol['ai']; }) as $key => $item): ?>
                                         <label style="display:inline-flex;align-items:center;gap:6px;margin:6px 12px 6px 0;"><input type="checkbox" value="<?php echo esc_attr($key); ?>">
                                             <img src="<?php echo esc_url(plugin_dir_url(dirname(__DIR__, 2) . '/wp-form.php') . 'assets/lucide/icons/' . $item['icon'] . '.svg'); ?>" width="22" height="22" alt="">
                                             <?php echo esc_html($item['label']); ?></label>

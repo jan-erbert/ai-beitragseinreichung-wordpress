@@ -1,5 +1,25 @@
 # Changelog – AI Beitragseinreichung
 
+## Version 1.3.1 – 2026-10-16
+
+**Added:**
+
+- Symbolpool als Popup mit Vorschaukacheln, großer Symbolvorschau und verständlichen Eingabefeldern.
+- Durchsuchbare Bildauswahl für den lokalen Symbolkatalog und für das Einfügen im Beitrag.
+- Einzelne Freigaben je Symbol: für Redaktion, KI, Fließtext und Zwischenüberschriften.
+
+**Changed:**
+
+- Symbole werden über Eingabefelder bearbeitet; das bisherige Textformat muss nicht mehr von Hand gepflegt werden.
+- Bestehende Symbolkennungen bleiben erhalten. Vorhandene Symbole und Stilgruppen sind weiterhin nutzbar.
+- „Was ist neu?“ erklärt die neuen Möglichkeiten für Anwender anhand ihrer Vorteile.
+- Anleitung zur Symbolverwaltung und zur bebilderten Auswahl aktualisiert.
+
+**Fixed:**
+
+- Symbolbezeichnungen und Beschreibungen werden in den Vorschaukacheln vollständig umbrochen.
+- Die KI und die Beitragsvorschau berücksichtigen die Freigabe für Text oder Zwischenüberschriften.
+
 ## Version 1.3.0 – 2026-10-16
 
 **Added:**
